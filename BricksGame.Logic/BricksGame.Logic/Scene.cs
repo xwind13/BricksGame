@@ -144,15 +144,7 @@ namespace BricksGame.Logic
             if (_movingSquare.IsMoving)
                 return false;
 
-            var direction = new MoveDirection(side switch
-            {
-                Side.Top => Direction.Down,
-                Side.Bottom => Direction.Up,
-                Side.Left => Direction.Right,
-                Side.Right => Direction.Left,
-
-                _ => throw new InvalidEnumArgumentException($"{side} is invalid argument")
-            });
+            var direction = _sideFields[side].ThrowDirection;
 
             var dest = _matrixField.FindAvalibleDestinationInDirection(direction, lineIdx);
             if (dest == -1)
