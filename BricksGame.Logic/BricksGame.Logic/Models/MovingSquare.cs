@@ -16,9 +16,7 @@ namespace BricksGame.Logic.Models
 
         public bool IsMoving { get; private set; }
 
-        public event Action<MovingSquare> MoveStarted;
-
-        public event Action<MovingSquare> MoveFinished;
+        public event Action<ISquare> StateChanged;
 
         public bool Start((uint X, uint Y) point, Color clr, Direction dir, uint dest)
         {
@@ -32,7 +30,7 @@ namespace BricksGame.Logic.Models
             Destination = dest;
             IsMoving = true;
 
-            MoveStarted?.Invoke(this);
+            StateChanged?.Invoke(this);
 
             return true;
         }
@@ -41,7 +39,7 @@ namespace BricksGame.Logic.Models
         {
             IsMoving = false;
 
-            MoveFinished?.Invoke(this);
+            StateChanged?.Invoke(this);
         }
 
         public MovingSquare() {}

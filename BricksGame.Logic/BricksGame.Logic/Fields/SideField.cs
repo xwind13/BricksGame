@@ -17,7 +17,11 @@ namespace BricksGame.Logic.Fields
                 SetColor(other.Color);
             }
 
-            public void SetColor(Color color) { Color = color; }
+            public void SetColor(Color color) 
+            { 
+                Color = color;
+                OnStateChanged();
+            }
         }
 
         private readonly Lazy<Matrix<ISquare>> _lazyReadOnlyMatrix;

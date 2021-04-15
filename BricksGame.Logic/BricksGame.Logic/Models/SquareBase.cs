@@ -17,6 +17,13 @@ namespace BricksGame.Logic
 
         public Color Color { get; protected set; }
 
+        public event Action<ISquare> StateChanged;
+
+        protected void OnStateChanged()
+        {
+            StateChanged?.Invoke(this);
+        }
+
         public virtual object Clone() => MemberwiseClone();
     }
 }

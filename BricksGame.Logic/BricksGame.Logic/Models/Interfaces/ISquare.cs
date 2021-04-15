@@ -1,4 +1,6 @@
-﻿namespace BricksGame.Logic
+﻿using System;
+
+namespace BricksGame.Logic
 {
     public interface ISquare
     {
@@ -7,5 +9,7 @@
         uint Y { get; }
 
         Color Color { get; }
+
+        event Action<ISquare> StateChanged;
     }
 }

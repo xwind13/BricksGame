@@ -20,6 +20,8 @@ namespace BricksGame.Logic.Test
 
             public Color Color { get; }
 
+            public event Action<ISquare> StateChanged { add { } remove { } }
+
             public TestMainFieldSquare(uint x, uint y, MainFieldSquareState state, Color color)
             {
                 X = x; Y = y; State = state; Color = color;
@@ -187,12 +189,10 @@ namespace BricksGame.Logic.Test
             var fieldSetting = CreateDefaultFieldSetting();
             var mainField = TestMainField.Create(fieldSetting, states);
 
-            var item = mainField.FindSquareWithDestinationToMove();
-            item.ShouldNotBeNull();
+            ( var square, var destination ) = mainField.FindSquareWithDestinationToMove();
 
-            var square = item.Square;
-
-            item.Destination.ShouldBe(result.Item2);
+            square.ShouldNotBeNull();
+            destination.ShouldBe(result.Item2);
             if (result.Item2 != -1)
             {
                 square.ShouldNotBeNull();
@@ -201,7 +201,7 @@ namespace BricksGame.Logic.Test
             }
         }
 
-        // first - same obstacle, second - same direction
+        // fls - first - same obstacle, second - same direction
         public static List<TestMainFieldSquare> GenerateHorzValues((bool, bool)[] fls, bool obstacleDestoyed)
         {
             var dir = Direction.Right;
@@ -218,6 +218,7 @@ namespace BricksGame.Logic.Test
             };
         }
 
+        // fls - first - same obstacle, second - same direction
         public static List<TestMainFieldSquare> GenerateVertValues((bool, bool)[] fls, bool obstacleDestoyed)
         {
             var dir = Direction.Up;
@@ -234,11 +235,17 @@ namespace BricksGame.Logic.Test
             };
         }
 
+        /// <summary>
+        /// create test square
+        /// </summary>
         private static TestMainFieldSquare TS(uint x, uint y, bool isActive = false, uint obstacle = 0, Direction dir = Direction.None, Color color = Color.None)
         {
             return new TestMainFieldSquare(x, y, new MainFieldSquareState(isActive, obstacle, dir), color);
         }
 
+        /// <summary>
+        /// create test square with active status.
+        /// </summary>
         private static TestMainFieldSquare TSA(uint x, uint y, uint obstacle = 0, Direction dir = Direction.None, Color color = Color.None)
         {
             return TS(x, y, true, obstacle, dir, color);

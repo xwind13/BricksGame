@@ -20,6 +20,7 @@ namespace BricksGame.Logic.Fields
             public void SetState(MainFieldSquareState state, Color color)
             {
                 State = state; Color = color;
+                OnStateChanged();
             }
 
             public void CopyState(MainFieldSquare other)
@@ -150,7 +151,7 @@ namespace BricksGame.Logic.Fields
             return square != null ? destination : -1;
         }
 
-        public (IMainFieldSquare Square, int Destination) FindSquareWithDestinationToMove()
+        public (IMainFieldSquare square, int destination) FindSquareWithDestinationToMove()
         {
             var destinationIdx = -1;
             var value = Find((item) => HasDestinationToMove(item, out destinationIdx));

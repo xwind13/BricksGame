@@ -32,15 +32,16 @@ namespace BricksGame.Logic
         public Scene(FieldSetting setting)
         {
             _matrixField = MainField.Create(setting);
-            _sideFields = new Dictionary<Side, SideField>();
-
-            _sideFields[Side.Top] = SideField.Create(setting, Side.Top);
-            _sideFields[Side.Left] = SideField.Create(setting, Side.Left);
-            _sideFields[Side.Bottom] = SideField.Create(setting, Side.Bottom);
-            _sideFields[Side.Right] = SideField.Create(setting, Side.Right);
+            _sideFields = new Dictionary<Side, SideField>
+            {
+                [Side.Top] = SideField.Create(setting, Side.Top),
+                [Side.Left] = SideField.Create(setting, Side.Left),
+                [Side.Bottom] = SideField.Create(setting, Side.Bottom),
+                [Side.Right] = SideField.Create(setting, Side.Right)
+            };
 
             _movingSquare = new MovingSquare();
-            _movingSquare.MoveFinished += HandleMovingSquareMoveFinishedEvent;
+            _movingSquare.StateChanged += HandleMovingSquareMoveFinishedEvent;
 
             _score = new Score(setting);
 
@@ -48,8 +49,9 @@ namespace BricksGame.Logic
             InitStateManagersList();
         }
 
-        private void HandleMovingSquareMoveFinishedEvent(MovingSquare ms)
+        private void HandleMovingSquareMoveFinishedEvent(ISquare sq)
         {
+            var ms = sq as MovingSquare;
             var dir = new MoveDirection(ms.Direction);
             var dest = ms.Destination;
 
@@ -72,8 +74,8 @@ namespace BricksGame.Logic
             }
             else
             {
-                (uint X, uint Y) point = dir.IsHorzOrient() ? (dest, ms.Y) : (ms.X, dest);
-                _matrixField.SetSquareState(point.X, point.Y, ms.Color, ms.Direction);
+                (uint x, uint y) = dir.IsHorzOrient() ? (dest, ms.Y) : (ms.X, dest);
+                _matrixField.SetSquareState(x, y, ms.Color, ms.Direction);
 
                 var combinations = _matrixField.GetSquareCombinations();
                 foreach(var combination in combinations)
@@ -81,17 +83,16 @@ namespace BricksGame.Logic
                     _score.Add(combination.Count());
                     CombinationDestroyed?.Invoke(combination);
 
-                    foreach (var square in combination)
+                    foreach (var item in combination)
                     {
-                        _matrixField.ResetSquareState(square.X, square.Y);
+                        _matrixField.ResetSquareState(item.X, item.Y);
                     }
                 }
 
-                var nextMoveSquare = _matrixField.FindSquareWithDestinationToMove();
-                if (nextMoveSquare.Destination != -1)
+                var (square, destination) = _matrixField.FindSquareWithDestinationToMove();
+                if (destination != -1)
                 {
-                    var square = nextMoveSquare.Square;
-                    _movingSquare.Start((square.X, square.Y), square.Color, square.State.Direction.Value, (uint)nextMoveSquare.Destination);
+                    _movingSquare.Start((square.X, square.Y), square.Color, square.State.Direction.Value, (uint)destination);
                 }
             }
 
