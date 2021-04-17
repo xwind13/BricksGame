@@ -1,16 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using BricksGame.Logic;
+using Assets.Scripts;
 
-public class SideFieldManager : MonoBehaviour
+public class SideField : MonoBehaviour
 {
-    public BrickBehaviour prefab;
-    public Side side;
+    [SerializeField] private Brick _prefab;
+    [SerializeField] public Side Side { get; set; }
 
     private int columns, rows;
-
-    private const float TILE_SIZE = 2.5f;
 
     // Start is called before the first frame update
     void Start()
@@ -22,7 +19,6 @@ public class SideFieldManager : MonoBehaviour
         {
             for (int j = 0; j < rows; j++)
             {
-                //Grid[i, j] = Random.Range(0, 10);
                 SpawnTile(i, j);
             }
         }
@@ -30,16 +26,18 @@ public class SideFieldManager : MonoBehaviour
 
     private void SpawnTile(int x, int y)
     {
-        var g = Instantiate(prefab, gameObject.transform);
+        var g = Instantiate(_prefab, gameObject.transform);
 
-        g.color = 3;
-        g.x = x; g.y = y;
-        g.transform.localPosition = new Vector3(CalcXforLocation(x, y) * TILE_SIZE, CalcYForLocation(x, y) * TILE_SIZE);
+        g.Color = 3;
+        g.SetRelativeCoords(x, y);
+        g.transform.localPosition = new Vector3(
+            CalcXforLocation(x, y) * BrickSetting.TileSize, 
+            CalcYForLocation(x, y) * BrickSetting.TileSize);
     }
 
     private int CalcXforLocation(int x, int y)
     {
-        switch(side)
+        switch(Side)
         {
             case Side.Top:
             case Side.Bottom:
@@ -55,7 +53,7 @@ public class SideFieldManager : MonoBehaviour
 
     private int CalcYForLocation(int x, int y)
     {
-        switch (side)
+        switch (Side)
         {
             case Side.Top:
                 return y;
