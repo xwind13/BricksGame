@@ -11,6 +11,7 @@ public class GameField : MonoBehaviour
     [SerializeField] private MainField _mainFieldPrefub;
 
     [SerializeField] private Text _scoreText;
+    [SerializeField] private AudioSource _laserSound;
 
     private const float Offset = BrickSetting.TileSize / 2;
     private const int HalfFieldSize = 5;
@@ -91,7 +92,10 @@ public class GameField : MonoBehaviour
 
     private void SideFieldClickEventHandler(object sender, Assets.Scripts.Events.SideFieldClickEventArgs e)
     {
-        _gameSceneLogic.ThrowSquare(e.Side, e.PosIdx);
+        if(_gameSceneLogic.ThrowSquare(e.Side, e.PosIdx))
+        {
+            _laserSound.Play();
+        }
     }
 
     private MainField InstantiateMainField(IMatrix<IMainFieldSquare> mainMatrix, MovingSquare movingSquare)
