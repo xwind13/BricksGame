@@ -3,11 +3,14 @@ using BricksGame.Logic;
 using BricksGame.Logic.Matrix;
 using BricksGame.Logic.Models;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameField : MonoBehaviour
 {
     [SerializeField] private SideField _sideFieldPrefub;
     [SerializeField] private MainField _mainFieldPrefub;
+
+    [SerializeField] private Text _scoreText;
 
     private const float Offset = BrickSetting.TileSize / 2;
     private const int HalfFieldSize = 5;
@@ -24,12 +27,19 @@ public class GameField : MonoBehaviour
 
         _gameSceneLogic = new Scene(settings);
 
+        _gameSceneLogic.ScoreUpdated += ScoreUpdated;
+
         InstantiateMainField(_gameSceneLogic.MainFieldMatrix, _gameSceneLogic.MovingSquare);
 
         InstantiateTopSideField(_gameSceneLogic.GetSideMatrix(Side.Top));
         InstantiateLeftSideField(_gameSceneLogic.GetSideMatrix(Side.Left));
         InstantiateBottomSideField(_gameSceneLogic.GetSideMatrix(Side.Bottom));
         InstantiateRightSideField(_gameSceneLogic.GetSideMatrix(Side.Right));
+    }
+
+    private void ScoreUpdated(int score)
+    {
+        _scoreText.text = score.ToString();
     }
 
     private SideField InstantiateTopSideField(IMatrix<ISquare> matrix)
