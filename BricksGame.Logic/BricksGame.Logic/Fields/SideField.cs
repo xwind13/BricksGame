@@ -8,6 +8,8 @@ namespace BricksGame.Logic.Fields
 {
     public class SideField : Matrix<ISquare>, IMatrix<ISquare>
     {
+        private static readonly Random Random = new Random();
+
         private class SideFieldSquare : SquareBase, ISquare, IStateCopyable<SideFieldSquare>
         {
             public SideFieldSquare(uint x, uint y) : base(x, y) {}
@@ -25,8 +27,6 @@ namespace BricksGame.Logic.Fields
         }
 
         private readonly Lazy<Matrix<ISquare>> _lazyReadOnlyMatrix;
-
-        private readonly Random _random;
 
         public IStateManager StateManager { get; }
 
@@ -49,8 +49,6 @@ namespace BricksGame.Logic.Fields
 
                 return new Matrix<ISquare>(items);
             });
-
-            _random = new Random();
 
             Generate();
         }
@@ -112,7 +110,7 @@ namespace BricksGame.Logic.Fields
 
         private Color GetRandomColor()
         {
-            return (Color)_random.Next(1, Enum.GetNames(typeof(Color)).Count());
+            return (Color)Random.Next(1, Enum.GetNames(typeof(Color)).Count());
         }
 
         private static MoveDirection GetMoveDirectionFromLocation(Side location)
