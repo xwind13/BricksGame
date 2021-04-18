@@ -28,7 +28,7 @@ public class MovingBrick : MonoBehaviour
         if (movingSquare == null)
             return;
 
-        _movingBrick.gameObject.GetComponent<Renderer>().enabled = movingSquare.IsMoving;
+        _movingBrick.HideShow(movingSquare.IsMoving);
         _movingBrick.transform.localPosition = new Vector3(
             movingSquare.X * BrickSetting.TileSize, 
             movingSquare.Y * BrickSetting.TileSize, 1);
@@ -83,7 +83,7 @@ public class MovingBrick : MonoBehaviour
 
     private void FinishMove()
     {
-        _movingBrick.gameObject.GetComponent<Renderer>().enabled = false;
+        _movingBrick.HideShow(false);
         Value.Finish();
     }
 }

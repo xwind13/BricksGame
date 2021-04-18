@@ -6,6 +6,7 @@ using UnityEngine;
 public class Brick : MonoBehaviour
 {
     [SerializeField] private Sprite[] _colors;
+    [SerializeField] Arrow _arrow;
 
     public ISquare Value { get; set; }
 
@@ -28,8 +29,19 @@ public class Brick : MonoBehaviour
 
         Value.StateChanged += Value_StateChanged;
 
+        if (Value is IMainFieldSquare || Value is MovingSquare)
+        {
+            _arrow = Instantiate(_arrow, this.transform);
+        }
+
+        if (Value is MovingSquare)
+        {
+            _arrow.Direction = (Value as MovingSquare).Direction;
+        }
+
         if (Value is IMainFieldSquare)
         {
+            _arrow.Direction = (Value as IMainFieldSquare).State.Direction.Value;
             this.enabled = (Value as IMainFieldSquare).State.IsActive;
         }
     }
@@ -37,8 +49,14 @@ public class Brick : MonoBehaviour
     private void Value_StateChanged(ISquare square)
     {
         _spriteRenderer.sprite = GetColorSprite(square.Color);
+        if (Value is MovingSquare)
+        {
+            _arrow.Direction = (Value as MovingSquare).Direction;
+        }
+
         if (square is IMainFieldSquare)
         {
+            _arrow.Direction = (Value as IMainFieldSquare).State.Direction.Value;
             this.enabled = (square as IMainFieldSquare).State.IsActive;
         }
     }
@@ -74,6 +92,11 @@ public class Brick : MonoBehaviour
             return null;
 
         return _colors[colorIdx - 1];
-        
+    }
+
+    public void HideShow(bool show)
+    {
+        _spriteRenderer.enabled = show;
+        _arrow.GetComponent<Renderer>().enabled = show;
     }
 }
