@@ -1,36 +1,52 @@
+using BricksGame.Logic;
+using BricksGame.Logic.Models;
+using System;
 using UnityEngine;
 
 public class Brick : MonoBehaviour
 {
     [SerializeField] private Sprite[] _colors;
 
-    public int Color { get; set; }
-    public bool IsTop { get; set; } = false;
+    public ISquare Value { get; set; }
 
-    // relative coords for brick in field.
-    private int _x;
-    private int _y;
-
-    private string _brickName;
+    public event Action<ISquare> BrickPressed;
     private SpriteRenderer _spriteRenderer;
 
     // Start is called before the first frame update
     void Start()
     {
-        _brickName = $"x: {_x}, y: {_y}";
-        GameObject g = new GameObject(_brickName);
+        if (Value == null)
+            return;
+
+        GameObject g = new GameObject();
         g.transform.parent = this.gameObject.transform;
         g.transform.localPosition = new Vector3(0, 0);
 
-        _spriteRenderer = g.AddComponent<SpriteRenderer>();
-        _spriteRenderer.sprite = _colors[Color];
-        _spriteRenderer.sortingOrder = IsTop ? 99 : 10;
+        _spriteRenderer = this.GetComponent<SpriteRenderer>();
+        _spriteRenderer.sprite = GetColorSprite(Value.Color);
+        _spriteRenderer.sortingOrder = Value is MovingSquare ? 99 : 10;
+
+        Value.StateChanged += Value_StateChanged;
+
+        if (Value is IMainFieldSquare)
+        {
+            this.enabled = (Value as IMainFieldSquare).State.IsActive;
+        }
+    }
+
+    private void Value_StateChanged(ISquare square)
+    {
+        _spriteRenderer.sprite = GetColorSprite(square.Color);
+        if (square is IMainFieldSquare)
+        {
+            this.enabled = (square as IMainFieldSquare).State.IsActive;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonDown(0))
             HandleClick();
     }
 
@@ -42,15 +58,22 @@ public class Brick : MonoBehaviour
             return;
 
         // only first row can handle click.
-        if (rayHit.transform == this.transform && _y == 0)
+        if (rayHit.transform == this.transform)
         {
-           print(_brickName);
+            BrickPressed?.Invoke(Value);
         }
     }
 
-    public void SetRelativeCoords(int x, int y)
+    private Sprite GetColorSprite(BricksGame.Logic.Color color)
     {
-        _x = x;
-        _y = y;
+        if (_colors == null || color == BricksGame.Logic.Color.None)
+            return null;
+
+        var colorIdx = (int)color;
+        if (_colors.Length < colorIdx)
+            return null;
+
+        return _colors[colorIdx - 1];
+        
     }
 }

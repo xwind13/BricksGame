@@ -1,68 +1,66 @@
 ﻿using UnityEngine;
 using BricksGame.Logic;
 using Assets.Scripts;
+using BricksGame.Logic.Matrix;
+using System.ComponentModel;
+using System;
+using Assets.Scripts.Events;
 
 public class SideField : MonoBehaviour
 {
     [SerializeField] private Brick _prefab;
-    [SerializeField] public Side Side { get; set; }
 
-    private int columns, rows;
+    public Side Side { get; set; }
+    public IMatrix<ISquare> Matrix { get; set; }
+
+    public event EventHandler<SideFieldClickEventArgs> ClickEventHandler;
 
     // Start is called before the first frame update
     void Start()
     {
-        rows = 3;
-        columns = 10;
+        if (Matrix == null)
+            return;
 
-        for (int i = 0; i < columns; i++)
-        {
-            for (int j = 0; j < rows; j++)
-            {
-                SpawnTile(i, j);
-            }
-        }
+        Matrix.ForEach(square => SpawnBrick(square));
     }
 
-    private void SpawnTile(int x, int y)
+    private void SpawnBrick(ISquare square)
     {
         var g = Instantiate(_prefab, gameObject.transform);
 
-        g.Color = 3;
-        g.SetRelativeCoords(x, y);
+        g.Value = square;
         g.transform.localPosition = new Vector3(
-            CalcXforLocation(x, y) * BrickSetting.TileSize, 
-            CalcYForLocation(x, y) * BrickSetting.TileSize);
+            CalcXforLocation(square.X, square.Y) * BrickSetting.TileSize, 
+            CalcYForLocation(square.X, square.Y) * BrickSetting.TileSize);
+
+        g.BrickPressed += BrickPressed;
     }
 
-    private int CalcXforLocation(int x, int y)
+    private void BrickPressed(ISquare sqare)
     {
-        switch(Side)
+        if (sqare.Y == 0)
         {
-            case Side.Top:
-            case Side.Bottom:
-                return x;
-            case Side.Left:
-                return rows - y - 1;
-            case Side.Right:
-                return y;
+            ClickEventHandler?.Invoke(this, new SideFieldClickEventArgs() { Side = Side, PosIdx = sqare.X });
         }
-
-        return x;
     }
 
-    private int CalcYForLocation(int x, int y)
+    private uint CalcXforLocation(uint x, uint y) => Side switch
     {
-        switch (Side)
-        {
-            case Side.Top:
-                return y;
-            case Side.Bottom:
-                return rows - y - 1;
-            case Side.Left:
-            case Side.Right:
-                return x;
-        }
-        return y;
-    }
+        Side.Top => x,
+        Side.Bottom => x,
+        Side.Left => Matrix.Height - y - 1,
+        Side.Right => y,
+
+        _ => throw new InvalidEnumArgumentException($"{Side} is invalid argument")
+    };
+
+    private uint CalcYForLocation(uint x, uint y) => Side switch
+    {
+        Side.Top => y,
+        Side.Bottom => Matrix.Height - y - 1,
+        Side.Left => x,
+        Side.Right => x,
+
+        _ => throw new InvalidEnumArgumentException($"{Side} is invalid argument")
+    };
 }

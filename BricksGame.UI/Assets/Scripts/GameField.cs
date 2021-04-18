@@ -1,4 +1,7 @@
 using Assets.Scripts;
+using BricksGame.Logic;
+using BricksGame.Logic.Matrix;
+using BricksGame.Logic.Models;
 using UnityEngine;
 
 public class GameField : MonoBehaviour
@@ -9,65 +12,83 @@ public class GameField : MonoBehaviour
     private const float Offset = BrickSetting.TileSize / 2;
     private const int HalfFieldSize = 5;
 
+    private Scene _gameSceneLogic;
+
     // Start is called before the first frame update
     void Start()
     {
-        InstantiateMainField();
+        var settings = FieldSetting.getDefault();
+        settings.HorzDimension = BrickSetting.FieldSize;
+        settings.VertDimension = BrickSetting.FieldSize;
+        settings.SideDimension = BrickSetting.SideFieldSize;
 
-        InstantiateTopSideField();
-        InstantiateLeftSideField();
-        InstantiateBottomSideField();
-        InstantiateRightSideField();
+        _gameSceneLogic = new Scene(settings);
+
+        InstantiateMainField(_gameSceneLogic.MainFieldMatrix, _gameSceneLogic.MovingSquare);
+
+        InstantiateTopSideField(_gameSceneLogic.GetSideMatrix(Side.Top));
+        InstantiateLeftSideField(_gameSceneLogic.GetSideMatrix(Side.Left));
+        InstantiateBottomSideField(_gameSceneLogic.GetSideMatrix(Side.Bottom));
+        InstantiateRightSideField(_gameSceneLogic.GetSideMatrix(Side.Right));
     }
 
-    private SideField InstantiateTopSideField()
+    private SideField InstantiateTopSideField(IMatrix<ISquare> matrix)
     {
         var position = new Vector3(
             -HalfFieldSize * BrickSetting.TileSize + Offset,
             HalfFieldSize * BrickSetting.TileSize + Offset, 0);
 
-        return InstantiateSideField(BricksGame.Logic.Side.Top, position);
+        return InstantiateSideField(Side.Top, matrix, position);
     }
 
-    private SideField InstantiateLeftSideField()
+    private SideField InstantiateLeftSideField(IMatrix<ISquare> matrix)
     {
         var position = new Vector3(
             -HalfFieldSize * BrickSetting.TileSize - BrickSetting.SideFieldSize * BrickSetting.TileSize + Offset,
             -HalfFieldSize * BrickSetting.TileSize + Offset, 0);
 
-        return InstantiateSideField(BricksGame.Logic.Side.Left, position);
+        return InstantiateSideField(Side.Left, matrix, position);
     }
 
-    private SideField InstantiateBottomSideField()
+    private SideField InstantiateBottomSideField(IMatrix<ISquare> matrix)
     {
         var position = new Vector3(
             -HalfFieldSize * BrickSetting.TileSize + Offset,
             -HalfFieldSize * BrickSetting.TileSize - BrickSetting.SideFieldSize * BrickSetting.TileSize + Offset, 0);
 
-        return InstantiateSideField(BricksGame.Logic.Side.Bottom, position);
+        return InstantiateSideField(Side.Bottom, matrix, position);
     }
 
-    private SideField InstantiateRightSideField()
+    private SideField InstantiateRightSideField(IMatrix<ISquare> matrix)
     {
         var position = new Vector3(
             HalfFieldSize * BrickSetting.TileSize + Offset,
             -HalfFieldSize * BrickSetting.TileSize + Offset, 0);
 
-        return InstantiateSideField(BricksGame.Logic.Side.Right, position);
+        return InstantiateSideField(Side.Right, matrix, position);
     }
 
-    private SideField InstantiateSideField(BricksGame.Logic.Side side, Vector3 position)
+    private SideField InstantiateSideField(Side side, IMatrix<ISquare> matrix, Vector3 position)
     {
         var sideField = Instantiate(_sideFieldPrefub, gameObject.transform);
         sideField.Side = side;
+        sideField.Matrix = matrix;
         sideField.transform.position = position;
+        sideField.ClickEventHandler += SideFieldClickEventHandler;
 
         return sideField;
     }
 
-    private MainField InstantiateMainField()
+    private void SideFieldClickEventHandler(object sender, Assets.Scripts.Events.SideFieldClickEventArgs e)
+    {
+        _gameSceneLogic.ThrowSquare(e.Side, e.PosIdx);
+    }
+
+    private MainField InstantiateMainField(IMatrix<IMainFieldSquare> mainMatrix, MovingSquare movingSquare)
     {
         var mainField = Instantiate(_mainFieldPrefub, gameObject.transform);
+        mainField.Matrix = mainMatrix;
+        mainField.MovingSquare = movingSquare;
         mainField.transform.position = new Vector3(
             -HalfFieldSize * BrickSetting.TileSize + Offset, 
             -HalfFieldSize * BrickSetting.TileSize + Offset, 0);

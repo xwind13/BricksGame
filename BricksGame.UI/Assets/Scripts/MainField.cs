@@ -1,6 +1,7 @@
 using Assets.Scripts;
-using System.Collections;
-using System.Collections.Generic;
+using BricksGame.Logic;
+using BricksGame.Logic.Matrix;
+using BricksGame.Logic.Models;
 using UnityEngine;
 
 public class MainField : MonoBehaviour
@@ -8,37 +9,33 @@ public class MainField : MonoBehaviour
     [SerializeField] private Brick _brick;
     [SerializeField] private MovingBrick _movingBrick;
 
-    private int columns, rows;
+    public IMatrix<IMainFieldSquare> Matrix { get; set; }
+    public MovingSquare MovingSquare { get; set; }
 
     // Start is called before the first frame update
     void Start()
     {
-        rows = 10;
-        columns = 10;
+        if (Matrix == null)
+            return;
 
-        for (int i = 0; i < columns; i++)
-        {
-            for (int j = 0; j < rows; j++)
-            {
-                //Grid[i, j] = Random.Range(0, 10);
-                SpawnTile(i, j);
-            }
-        }
-
-        Instantiate(_movingBrick, gameObject.transform);
+        Matrix.ForEach(square => SpawnBrick(square));
+        InstantiateMovingSquare();
     }
 
-    private void SpawnTile(int x, int y)
+    private void InstantiateMovingSquare()
+    {
+        var g = Instantiate(_movingBrick, gameObject.transform);
+        g.Value = MovingSquare;
+    }
+
+    private void SpawnBrick(IMainFieldSquare square)
     {
         var g = Instantiate(_brick, gameObject.transform);
 
-        g.Color = 3;
-        g.SetRelativeCoords(x, y);
+        g.Value = square;
         g.transform.localPosition = new Vector3(
-            x * BrickSetting.TileSize,
-            y * BrickSetting.TileSize);
-
-        g.enabled = false;
+            square.X * BrickSetting.TileSize,
+            square.Y * BrickSetting.TileSize);
     }
 
     // Update is called once per frame

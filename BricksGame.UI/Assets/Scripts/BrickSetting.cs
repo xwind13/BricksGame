@@ -6,5 +6,8 @@
 
         public const int FieldSize = 10;
         public const int SideFieldSize = 3;
+
+        public const int BrickSortingLevel = 10;
+        public const int MovingBrickSortingLevel = 99;
     }
 }
