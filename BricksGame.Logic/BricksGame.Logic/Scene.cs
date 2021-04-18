@@ -31,6 +31,8 @@ namespace BricksGame.Logic
 
         public event Action<IEnumerable<IMainFieldSquare>> CombinationDestroyed;
 
+        public event Action<int> ScoreUpdated;
+
         public Scene(FieldSetting setting)
         {
             _matrixField = MainField.Create(setting);
@@ -46,9 +48,15 @@ namespace BricksGame.Logic
             _movingSquare.StateChanged += HandleMovingSquareStateChangedEvent;
 
             _score = new Score(setting);
+            _score.ScoreUpdated += HandleScoreUpdatedEvent;
 
             _stateManagers = new List<IStateManager>();
             InitStateManagersList();
+        }
+
+        private void HandleScoreUpdatedEvent(int score)
+        {
+            ScoreUpdated?.Invoke(score);
         }
 
         private void HandleMovingSquareStateChangedEvent(ISquare sq)

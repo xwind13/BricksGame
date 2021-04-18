@@ -1,4 +1,5 @@
 ﻿using BricksGame.Logic.StateManagers;
+using System;
 
 namespace BricksGame.Logic.Models
 {
@@ -6,7 +7,18 @@ namespace BricksGame.Logic.Models
     {
         private int _winScore;
 
-        public int Value { get; private set; }
+        public int _value;
+        public int Value 
+        { 
+            get { return _value; }
+            private set
+            {
+                _value = value;
+                ScoreUpdated?.Invoke(_value);
+            } 
+        }
+
+        public event Action<int> ScoreUpdated; 
 
         public IStateManager StateManager { get; }
 
