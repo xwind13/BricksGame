@@ -26,6 +26,8 @@ namespace BricksGame.Logic.Fields
 
         private readonly Lazy<Matrix<ISquare>> _lazyReadOnlyMatrix;
 
+        private readonly Random _random;
+
         public IStateManager StateManager { get; }
 
         ///<summary>
@@ -37,7 +39,7 @@ namespace BricksGame.Logic.Fields
         {
             ThrowDirection = direction;
 
-            StateManager = new MatrixStateManager<SideFieldSquare>(this as IMatrix<SideFieldSquare>, 
+            StateManager = new MatrixStateManager<SideFieldSquare>(MatrixUpcast(), 
                 maxSavedStatesCount);
 
             _lazyReadOnlyMatrix = new Lazy<Matrix<ISquare>>(() =>
@@ -47,6 +49,18 @@ namespace BricksGame.Logic.Fields
 
                 return new Matrix<ISquare>(items);
             });
+
+            _random = new Random();
+
+            Generate();
+        }
+
+        private IMatrix<SideFieldSquare> MatrixUpcast()
+        {
+            var items = new SideFieldSquare[this.Width, this.Height];
+            this.ForEach((sqare, x, y) => items[x, y] = sqare as SideFieldSquare);
+
+            return new Matrix<SideFieldSquare>(items);
         }
 
         ///<summary>
@@ -72,7 +86,7 @@ namespace BricksGame.Logic.Fields
         ///</summary>
         public void Push(uint posIdx, Color color)
         {
-            for (uint x = Height - 1; x > 1; x--)
+            for (uint x = Height - 1; x > 0; x--)
             {
                 ApplyColorToItem(_items[posIdx, x], _items[posIdx, x - 1].Color);
             }
@@ -98,8 +112,7 @@ namespace BricksGame.Logic.Fields
 
         private Color GetRandomColor()
         {
-            Random random = new Random();
-            return (Color)random.Next(1, Enum.GetNames(typeof(Color)).Count());
+            return (Color)_random.Next(1, Enum.GetNames(typeof(Color)).Count());
         }
 
         private static MoveDirection GetMoveDirectionFromLocation(Side location)

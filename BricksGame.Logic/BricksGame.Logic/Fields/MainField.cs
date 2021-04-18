@@ -36,7 +36,7 @@ namespace BricksGame.Logic.Fields
         protected MainField(Matrix<IMainFieldSquare> matrix, 
             List<InitialSquare> initialObstacles, int maxSavedStatesCount) : base(matrix) 
         {
-            StateManager = new MatrixStateManager<MainFieldSquare>(Matrix as Matrix<MainFieldSquare>,
+            StateManager = new MatrixStateManager<MainFieldSquare>(MatrixUpcast(),
                 maxSavedStatesCount);
 
             _initialObstacles = new Dictionary<uint, InitialSquare>();
@@ -51,6 +51,14 @@ namespace BricksGame.Logic.Fields
 
                 ApplyStateToItem(item, state, square.Color);
             });
+        }
+
+        private IMatrix<MainFieldSquare> MatrixUpcast()
+        {
+            var items = new MainFieldSquare[Matrix.Width, Matrix.Height];
+            Matrix.ForEach((sqare, x, y) => items[x, y] = sqare as MainFieldSquare);
+
+            return new Matrix<MainFieldSquare>(items);
         }
 
         public void ResetSquareState(uint x, uint y)
