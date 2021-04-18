@@ -99,6 +99,7 @@ public class GameField : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetMouseButtonDown(1))
+            _gameSceneLogic.BackToPreviousState();
     }
 }
