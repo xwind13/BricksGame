@@ -21,6 +21,8 @@ namespace BricksGame.Logic
 
         private readonly List<IStateManager> _stateManagers;
 
+        public MovingSquare MovingSquare => _movingSquare;
+
         public IMatrix<IMainFieldSquare> MainFieldMatrix => _matrixField.Matrix;
 
         public IMatrix<ISquare> GetSideMatrix(Side side) => _sideFields[side].ToReadonlyMatrix();
@@ -41,7 +43,7 @@ namespace BricksGame.Logic
             };
 
             _movingSquare = new MovingSquare();
-            _movingSquare.StateChanged += HandleMovingSquareMoveFinishedEvent;
+            _movingSquare.StateChanged += HandleMovingSquareStateChangedEvent;
 
             _score = new Score(setting);
 
@@ -49,9 +51,12 @@ namespace BricksGame.Logic
             InitStateManagersList();
         }
 
-        private void HandleMovingSquareMoveFinishedEvent(ISquare sq)
+        private void HandleMovingSquareStateChangedEvent(ISquare sq)
         {
             var ms = sq as MovingSquare;
+            if (ms.IsMoving == true)
+                return;
+
             var dir = new MoveDirection(ms.Direction);
             var dest = ms.Destination;
 
@@ -88,12 +93,13 @@ namespace BricksGame.Logic
                         _matrixField.ResetSquareState(item.X, item.Y);
                     }
                 }
+            }
 
-                var (square, destination) = _matrixField.FindSquareWithDestinationToMove();
-                if (destination != -1)
-                {
-                    _movingSquare.Start((square.X, square.Y), square.Color, square.State.Direction.Value, (uint)destination);
-                }
+            var (square, destination) = _matrixField.FindSquareWithDestinationToMove();
+            if (destination != -1)
+            {
+                _movingSquare.Start((square.X, square.Y), square.Color, square.State.Direction.Value, (uint)destination);
+                _matrixField.ResetSquareState(square.X, square.Y);
             }
 
             if (!_movingSquare.IsMoving)
@@ -155,7 +161,9 @@ namespace BricksGame.Logic
 
             var color = _sideFields[side].Pop(lineIdx);
 
-            (uint X, uint Y) point = direction.IsHorzOrient() ? ((uint)dest, lineIdx) : (lineIdx, (uint)dest);
+            var startPos = _matrixField.GetLastIndexInDirection(direction.Opposite);
+
+            (uint X, uint Y) point = direction.IsHorzOrient() ? (startPos, lineIdx) : (lineIdx, startPos);
 
             _movingSquare.Start(point, color, direction.Value, (uint)dest);
 
