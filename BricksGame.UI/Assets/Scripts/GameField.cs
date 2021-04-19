@@ -12,10 +12,17 @@ public class GameField : MonoBehaviour
 
     [SerializeField] private Text _scoreText;
     [SerializeField] private AudioSource _laserSound;
+    [SerializeField] private AudioSource _boomSound;
+    [SerializeField] private AudioSource _glassSound;
+    [SerializeField] private AudioSource _hrumSound;
+    [SerializeField] private AudioSource _congratulationSound;
+
+    [SerializeField] private GameObject _gameOverPanel;
 
     private const float Offset = BrickSetting.TileSize / 2;
     private const int HalfFieldSize = 5;
 
+    private bool _isBlocked = false;
     private Scene _gameSceneLogic;
 
     // Start is called before the first frame update
@@ -29,6 +36,9 @@ public class GameField : MonoBehaviour
         _gameSceneLogic = new Scene(settings);
 
         _gameSceneLogic.ScoreUpdated += ScoreUpdated;
+        _gameSceneLogic.CombinationDestroyed += CombinationDestroyed;
+        _gameSceneLogic.GameOver += GameOver;
+        _gameSceneLogic.GameWon += GameWon;
 
         InstantiateMainField(_gameSceneLogic.MainFieldMatrix, _gameSceneLogic.MovingSquare);
 
@@ -36,6 +46,23 @@ public class GameField : MonoBehaviour
         InstantiateLeftSideField(_gameSceneLogic.GetSideMatrix(Side.Left));
         InstantiateBottomSideField(_gameSceneLogic.GetSideMatrix(Side.Bottom));
         InstantiateRightSideField(_gameSceneLogic.GetSideMatrix(Side.Right));
+    }
+
+    private void GameWon()
+    {
+        _congratulationSound.Play();
+    }
+
+    private void GameOver()
+    {
+        _glassSound.Play();
+        _gameOverPanel.SetActive(true);
+        _isBlocked = true;
+    }
+
+    private void CombinationDestroyed(System.Collections.Generic.IEnumerable<IMainFieldSquare> obj)
+    {
+        _boomSound.Play();
     }
 
     private void ScoreUpdated(int score)
@@ -92,7 +119,7 @@ public class GameField : MonoBehaviour
 
     private void SideFieldClickEventHandler(object sender, Assets.Scripts.Events.SideFieldClickEventArgs e)
     {
-        if(_gameSceneLogic.ThrowSquare(e.Side, e.PosIdx))
+        if(!_isBlocked && _gameSceneLogic.ThrowSquare(e.Side, e.PosIdx))
         {
             _laserSound.Play();
         }
@@ -113,7 +140,16 @@ public class GameField : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) && !_isBlocked)
+        {
+            _hrumSound.Play();
             _gameSceneLogic.BackToPreviousState();
+        }
+    }
+
+    public void StartNewGame()
+    {
+        _gameSceneLogic.Restart();
+        _isBlocked = false;
     }
 }
