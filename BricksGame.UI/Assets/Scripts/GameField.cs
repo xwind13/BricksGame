@@ -142,8 +142,10 @@ public class GameField : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1) && !_isBlocked)
         {
-            _hrumSound.Play();
-            _gameSceneLogic.BackToPreviousState();
+            if (_gameSceneLogic.BackToPreviousState())
+            {
+                _hrumSound.Play();
+            }
         }
     }
 
