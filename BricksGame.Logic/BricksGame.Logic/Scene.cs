@@ -130,9 +130,13 @@ namespace BricksGame.Logic
             }
         }
 
-        public void BackToPreviousState()
+        public bool BackToPreviousState()
         {
-            _stateManagers.ForEach(sm => sm.BackToPrevious());
+            // if there is any of state that returned to previous one.
+            var result = false;
+            _stateManagers.ForEach(sm => result |= sm.BackToPrevious());
+
+            return result;
         }
 
         private void SaveState()
