@@ -149,6 +149,16 @@ public class GameField : MonoBehaviour
         }
     }
 
+    public void Block()
+    {
+        _isBlocked = true;
+    }
+
+    public void Unblock()
+    {
+        _isBlocked = false;
+    }
+
     public void StartNewGame()
     {
         _gameSceneLogic.Restart();
