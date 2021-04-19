@@ -49,7 +49,7 @@ namespace BricksGame.Logic
             setting.VertDimension = 10;
             setting.HorzDimension = 10;
             setting.SideDimension = 10;
-            setting.MaxSavedStatesCount = 5;
+            setting.MaxSavedStatesCount = 10;
 
             setting.InitialSquares.Add(new InitialSquare(5, 3, Color.Yellow));
             setting.InitialSquares.Add(new InitialSquare(3, 5, Color.Red));
