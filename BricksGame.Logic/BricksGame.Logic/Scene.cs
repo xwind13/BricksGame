@@ -33,6 +33,8 @@ namespace BricksGame.Logic
 
         public event Action<int> ScoreUpdated;
 
+        public event Action GameWon;
+
         public Scene(FieldSetting setting)
         {
             _matrixField = MainField.Create(setting);
@@ -117,7 +119,9 @@ namespace BricksGame.Logic
                     _score.AddWinScore();
                     _matrixField.Reset();
 
-                    ClearStateHistory();
+                    GameWon?.Invoke();
+
+                    //ClearStateHistory();
                 }
                 else if(_matrixField.IsMoveDeadlock())
                 {
