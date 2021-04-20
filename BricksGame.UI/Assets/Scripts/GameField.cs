@@ -3,6 +3,7 @@ using BricksGame.Logic;
 using BricksGame.Logic.Matrix;
 using BricksGame.Logic.Models;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 
 public class GameField : MonoBehaviour
@@ -16,6 +17,7 @@ public class GameField : MonoBehaviour
     [SerializeField] private AudioSource _glassSound;
     [SerializeField] private AudioSource _hrumSound;
     [SerializeField] private AudioSource _congratulationSound;
+    [SerializeField] private AudioMixer _audioSource;
 
     [SerializeField] private GameObject _gameOverPanel;
 
@@ -32,6 +34,9 @@ public class GameField : MonoBehaviour
         settings.HorzDimension = BrickSetting.FieldSize;
         settings.VertDimension = BrickSetting.FieldSize;
         settings.SideDimension = BrickSetting.SideFieldSize;
+
+        var sliderValue = PlayerPrefs.GetFloat("Sound");
+        _audioSource.SetFloat("MusicVol", Mathf.Log10(sliderValue) * 20);
 
         _gameSceneLogic = new Scene(settings);
 

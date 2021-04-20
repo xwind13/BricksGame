@@ -37,10 +37,4 @@ public class MainField : MonoBehaviour
             square.X * BrickSetting.TileSize,
             square.Y * BrickSetting.TileSize);
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }
